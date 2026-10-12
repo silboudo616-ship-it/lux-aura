@@ -14,7 +14,7 @@ function App() {
   return (
     <ProductProvider>
       <CartProvider>
-        <BrowserRouter basename="/LUXPARFUM/">
+        <BrowserRouter basename="/luxaura/">
           <Routes>
             {/* Admin — standalone layout (no header/footer) */}
             <Route path="/admin/*" element={<Admin />} />
