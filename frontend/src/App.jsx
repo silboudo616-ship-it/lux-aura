@@ -14,7 +14,7 @@ function App() {
   return (
     <ProductProvider>
       <CartProvider>
-        <BrowserRouter basename="/luxaura/">
+        <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             {/* Admin — standalone layout (no header/footer) */}
             <Route path="/admin/*" element={<Admin />} />
