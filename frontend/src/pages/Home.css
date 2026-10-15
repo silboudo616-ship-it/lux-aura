@@ -1,65 +1,97 @@
-/* ── INTRO ── */
-.home__intro {
-  padding-block: clamp(7rem, 12vw, 11rem);
+/* ── SECTION PRÉSENTATION LUX AURA ── */
+.lux-aura-intro {
   text-align: center;
-  background: linear-gradient(135deg, #0d0d0f 0%, #151310 100%);
+  padding-block: clamp(5rem, 9vw, 8rem);
+  padding-inline: 1.5rem;
+  background: linear-gradient(135deg, #07221A 0%, #0B2D22 50%, #04150F 100%);
   position: relative;
   overflow: hidden;
-  border-top: 1px solid rgba(200, 169, 107, 0.2);
-  border-bottom: 1px solid rgba(200, 169, 107, 0.2);
+  border-top: 1px solid rgba(212, 175, 55, 0.22);
+  border-bottom: 1px solid rgba(212, 175, 55, 0.22);
 }
-.home__intro::before {
+.lux-aura-intro::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 80vw;
-  height: 80vw;
-  max-width: 1000px;
-  max-height: 1000px;
-  background: radial-gradient(circle, rgba(200, 169, 107, 0.12) 0%, rgba(0,0,0,0) 70%);
+  width: 75vw;
+  height: 75vw;
+  max-width: 900px;
+  max-height: 900px;
+  background: radial-gradient(circle, rgba(212, 175, 55, 0.12) 0%, rgba(0, 0, 0, 0) 70%);
   transform: translate(-50%, -50%);
   pointer-events: none;
 }
-.home__intro-inner {
-  max-width: 800px;
-  margin-inline: auto;
+.lux-aura-intro-inner {
+  max-width: 740px;
+  margin: 0 auto;
   position: relative;
   z-index: 1;
 }
 .home__intro-eyebrow {
   color: var(--gold);
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   letter-spacing: 0.3em;
+  font-size: 0.85rem;
+  text-transform: uppercase;
 }
-.home__intro-title {
+.lux-title {
   font-family: var(--font-serif);
-  font-size: clamp(2.5rem, 5vw, 4.5rem);
-  font-weight: 300;
-  line-height: 1.15;
-  margin-bottom: 2.5rem;
+  font-size: clamp(2rem, 4.2vw, 2.9rem);
+  font-weight: 400;
+  letter-spacing: 0.5px;
+  margin-bottom: 24px;
   color: var(--ivory);
+  line-height: 1.25;
 }
-.home__intro-title em { 
-  font-style: italic; 
-  background: linear-gradient(to right, #f4f1eb, var(--gold));
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
+.lux-divider {
+  width: 4rem;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent, var(--gold), transparent);
+  margin: 0 auto 28px;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.4);
 }
-.home__intro-divider {
-  width: 3rem;
-  height: 1px;
-  background: var(--gold);
-  margin-inline: auto;
-  margin-block: 3rem;
-  box-shadow: 0 0 10px rgba(200, 169, 107, 0.6);
+.lux-text {
+  font-family: var(--font-sans);
+  font-size: clamp(1.05rem, 1.8vw, 1.15rem);
+  line-height: 1.85;
+  margin-bottom: 18px;
+  color: var(--ivory-muted);
 }
-.home__intro-quote {
+.lux-text strong {
+  color: var(--gold-light);
+  font-weight: 500;
+}
+.lux-highlight-box {
+  margin: 32px auto 28px;
+  padding: 16px 28px;
+  display: inline-block;
+  background: rgba(16, 56, 43, 0.45);
+  border: 1px solid rgba(212, 175, 55, 0.35);
+  border-radius: 4px;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+}
+.lux-highlight {
   font-family: var(--font-serif);
-  font-size: clamp(1.2rem, 2vw, 1.6rem);
+  font-size: clamp(1.15rem, 2.2vw, 1.35rem);
+  color: var(--ivory);
+  letter-spacing: 0.3px;
+}
+.lux-highlight strong {
+  color: var(--gold);
+  font-weight: 600;
+}
+.lux-signature {
+  font-size: 1.05rem;
+  color: var(--gold);
+  margin-top: 24px;
+  letter-spacing: 0.5px;
+}
+.lux-signature em {
+  font-family: var(--font-serif);
   font-style: italic;
-  color: rgba(255, 255, 255, 0.75);
-  line-height: 1.8;
+  font-size: 1.15rem;
 }
 
 /* ── CATEGORIES ── */

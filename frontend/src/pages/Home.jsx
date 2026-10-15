@@ -40,19 +40,31 @@ const Home = () => {
       {/* ── HERO ── */}
       <Hero />
 
-      {/* ── INTRO EDITORIAL ── */}
-      <section className="home__intro">
-        <div className="home__intro-inner container reveal">
-          <p className="home__intro-eyebrow t-label">La Maison LUX AURA</p>
-          <h2 className="home__intro-title">
-            L'art de la parfumerie,<br />
-            <em>porté à son apogée.</em>
-          </h2>
-          <div className="home__intro-divider" />
-          <p className="home__intro-quote">
-            "Chaque fragrance est pensée comme une signature.<br />
-            Une composition où les matières, les notes et le temps se rencontrent."
+      {/* ── SECTION PRÉSENTATION LUX AURA ── */}
+      <section className="lux-aura-intro reveal">
+        <div className="lux-aura-intro-inner">
+          <p className="home__intro-eyebrow t-label">Maison Lux Aura</p>
+          <h2 className="lux-title">✨ Lux Aura — L'élégance et le charme à portée de tous</h2>
+
+          <div className="lux-divider" />
+
+          <p className="lux-text">
+            Des fragrances soigneusement sélectionnées, pensées pour celles et ceux qui aiment 
+            le luxe, l'élégance, et souhaitent affirmer leur charme en public comme en privé.
           </p>
+
+          <p className="lux-text">
+            Chaque parfum dégage une <strong>aura puissante et éclatante</strong> — 
+            une présence qui se remarque, qui séduit, qui reste.
+          </p>
+
+          <div className="lux-highlight-box">
+            <p className="lux-highlight">
+              Une collection <strong>exceptionnelle. Des prix accessibles.</strong>
+            </p>
+          </div>
+
+          <p className="lux-signature"><em>Lux Aura — Sentez la différence. 🌸</em></p>
         </div>
       </section>
 
