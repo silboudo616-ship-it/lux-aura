@@ -1,6 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import { useProducts } from '../context/ProductContext';
+import {
+  LayoutDashboard, Package, Settings, LogOut, ExternalLink, Plus, Search, Pencil, Trash2, Copy, Eye,
+  TriangleAlert, Menu, X, ImageOff, LayoutGrid, List, RotateCcw, Save, ArrowLeft, Upload, Link2, Check,
+} from 'lucide-react';
 import './Admin.css';
 
 /* ═══════════════════════════════════════════
@@ -37,9 +41,8 @@ const LoginScreen = ({ onLogin }) => {
           autoFocus
         />
         <button className="admin__btn admin__btn--primary" type="submit" style={{ width: '100%', justifyContent: 'center' }}>
-          Accéder au Dashboard
+          Accéder à l’administration
         </button>
-        <p className="admin__login-hint">Code par défaut : 1234</p>
       </form>
     </div>
   );
@@ -84,11 +87,11 @@ const ImageUploader = ({ value, onChange }) => {
               className="admin__img-preview-remove"
               onClick={() => { onChange(''); setImgError(false); }}
               title="Supprimer l'image"
-            >✕</button>
+            ><X size={16} /></button>
           </div>
         </div>
         <button type="button" className="admin__img-url-toggle" onClick={() => { setUseUrl(!useUrl); }}>
-          {useUrl ? '📁 Importer un fichier' : '🔗 Utiliser une URL'}
+          {useUrl ? <><Upload size={15} aria-hidden="true" /> Importer un fichier</> : <><Link2 size={15} aria-hidden="true" /> Utiliser une URL</>}
         </button>
       </div>
     );
@@ -107,14 +110,14 @@ const ImageUploader = ({ value, onChange }) => {
         </div>
       ) : (
         <div className="admin__img-upload" onClick={() => fileRef.current?.click()}>
-          <div className="admin__img-upload-icon">📷</div>
+          <div className="admin__img-upload-icon"><Upload size={26} aria-hidden="true" /></div>
           <p className="admin__img-upload-text">Cliquez ou glissez une image</p>
           <p className="admin__img-upload-hint">JPG, PNG, WebP — max 5 Mo</p>
           <input ref={fileRef} type="file" accept="image/*" onChange={handleFile} />
         </div>
       )}
       <button type="button" className="admin__img-url-toggle" onClick={() => setUseUrl(!useUrl)}>
-        {useUrl ? '📁 Importer un fichier' : '🔗 Utiliser une URL'}
+        {useUrl ? <><Upload size={15} aria-hidden="true" /> Importer un fichier</> : <><Link2 size={15} aria-hidden="true" /> Utiliser une URL</>}
       </button>
       {imgError && <p className="admin__form-error">Image inaccessible. Vérifiez le lien.</p>}
     </div>
@@ -222,14 +225,14 @@ const ProductForm = ({ product, onSave, onCancel, collections, genders }) => {
       <form onSubmit={handleSubmit}>
         {/* ── Image ── */}
         <div className="admin__form-section">
-          <h3 className="admin__form-section-title">📷 Image du produit</h3>
+          <h3 className="admin__form-section-title">Photo du parfum</h3>
           <ImageUploader value={form.image} onChange={(v) => set('image', v)} />
           {errors.image && <p className="admin__form-error" style={{marginTop:'0.5rem'}}>{errors.image}</p>}
         </div>
 
         {/* ── Informations principales ── */}
         <div className="admin__form-section">
-          <h3 className="admin__form-section-title">📝 Informations principales</h3>
+          <h3 className="admin__form-section-title">Informations principales</h3>
           <div className="admin__form-grid">
             <div className="admin__form-group admin__form-group--full">
               <label className="admin__form-label">Nom du parfum <span className="admin__form-required">*</span></label>
@@ -281,7 +284,7 @@ const ProductForm = ({ product, onSave, onCancel, collections, genders }) => {
 
         {/* ── Détails techniques ── */}
         <div className="admin__form-section">
-          <h3 className="admin__form-section-title">🧪 Détails du parfum</h3>
+          <h3 className="admin__form-section-title">Détails olfactifs</h3>
           <div className="admin__form-grid">
             <div className="admin__form-group">
               <label className="admin__form-label">Type de parfum</label>
@@ -340,7 +343,7 @@ const ProductForm = ({ product, onSave, onCancel, collections, genders }) => {
         {/* ── Master details (conditional) ── */}
         {form.collection === 'Master' && (
           <div className="admin__form-section">
-            <h3 className="admin__form-section-title">👑 Édition Master</h3>
+            <h3 className="admin__form-section-title">Édition Master</h3>
             <div className="admin__form-grid">
               <div className="admin__form-group">
                 <label className="admin__form-label">Pièces disponibles</label>
@@ -360,7 +363,7 @@ const ProductForm = ({ product, onSave, onCancel, collections, genders }) => {
         <div className="admin__form-actions">
           <button type="button" className="admin__btn admin__btn--ghost" onClick={onCancel}>Annuler</button>
           <button type="submit" className="admin__btn admin__btn--primary" disabled={saving}>
-            {saving ? '⏳ Enregistrement...' : (product ? '💾 Enregistrer les modifications' : '✨ Créer le parfum')}
+            {saving ? 'Enregistrement…' : (product ? 'Enregistrer les modifications' : 'Créer le parfum')}
           </button>
         </div>
       </form>
@@ -369,28 +372,71 @@ const ProductForm = ({ product, onSave, onCancel, collections, genders }) => {
 };
 
 /* ═══════════════════════════════════════════
-   DELETE MODAL
+   OUTILS
 ═══════════════════════════════════════════ */
-const DeleteModal = ({ productName, onConfirm, onClose }) => (
+const AVAILABILITY = ['Disponible', 'Sur réservation', 'Édition limitée', 'Rupture de stock'];
+const formatPrice = (v) => `${Number(v || 0).toLocaleString('fr-FR')} FCFA`;
+
+/* Contrôles qualité : ce qui mérite l'attention de l'équipe, produit par produit. */
+const auditProduct = (p) => {
+  const issues = [];
+  if (!p.image) issues.push('Aucune photo');
+  else if (/^https?:/.test(p.image) && !/images\.unsplash\.com/.test(p.image)) {
+    issues.push('Photo hébergée sur un autre site : elle peut disparaître sans prévenir');
+  }
+  if (!p.description || p.description.trim().length < 40) issues.push('Description trop courte');
+  if (!p.notes) issues.push('Notes olfactives manquantes');
+  if (p.availability === 'Rupture de stock') issues.push('En rupture de stock');
+  if (p.collection === 'Master' && p.masterDetails && p.masterDetails.available <= p.masterDetails.total * 0.1) {
+    issues.push(`Plus que ${p.masterDetails.available} pièces Master`);
+  }
+  return issues;
+};
+
+const Thumb = ({ p }) => (p.image
+  ? <img src={p.image} alt="" className="ad-thumb" />
+  : <span className="ad-thumb ad-thumb--empty"><ImageOff size={16} aria-hidden="true" /></span>);
+
+const ConfirmModal = ({ title, text, confirmLabel, onConfirm, onClose }) => (
   <div className="admin__modal-overlay" onClick={onClose}>
-    <div className="admin__modal" onClick={e => e.stopPropagation()}>
-      <div className="admin__confirm">
-        <div className="admin__confirm-icon">🗑️</div>
-        <p className="admin__confirm-text">Voulez-vous vraiment supprimer</p>
-        <p className="admin__confirm-name">« {productName} » ?</p>
-        <p style={{fontSize:'0.75rem',color:'rgba(255,255,255,0.35)',marginBottom:'1.5rem'}}>Cette action est irréversible.</p>
-        <div style={{ display: 'flex', gap: '0.75rem', justifyContent: 'center' }}>
-          <button className="admin__btn admin__btn--ghost" onClick={onClose}>Annuler</button>
-          <button className="admin__btn admin__btn--danger" onClick={onConfirm}>Supprimer définitivement</button>
-        </div>
+    <div className="admin__modal" role="dialog" aria-modal="true" aria-labelledby="confirm-title" onClick={(e) => e.stopPropagation()}>
+      <h2 id="confirm-title" className="ad-modal__title">{title}</h2>
+      <p className="ad-modal__text">{text}</p>
+      <div className="ad-modal__actions">
+        <button className="admin__btn admin__btn--ghost" onClick={onClose} autoFocus>Annuler</button>
+        <button className="admin__btn admin__btn--danger" onClick={onConfirm}>{confirmLabel}</button>
       </div>
     </div>
   </div>
 );
 
+const Bars = ({ title, rows }) => {
+  const max = Math.max(1, ...rows.map((r) => r.value));
+  return (
+    <section className="ad-panel">
+      <h2 className="ad-panel__title">{title}</h2>
+      <ul className="ad-bars">
+        {rows.map((r) => (
+          <li key={r.label} className="ad-bars__row" title={`${r.label} : ${r.value} parfum${r.value > 1 ? 's' : ''}`}>
+            <span className="ad-bars__label">{r.label}</span>
+            <span className="ad-bars__track"><span className="ad-bars__fill" style={{ width: `${(r.value / max) * 100}%` }} /></span>
+            <span className="ad-bars__value">{r.value}</span>
+          </li>
+        ))}
+      </ul>
+    </section>
+  );
+};
+
 /* ═══════════════════════════════════════════
    MAIN ADMIN COMPONENT
 ═══════════════════════════════════════════ */
+const NAV = [
+  { id: 'dashboard', label: 'Tableau de bord', icon: LayoutDashboard },
+  { id: 'products', label: 'Parfums', icon: Package },
+  { id: 'settings', label: 'Paramètres', icon: Settings },
+];
+
 const Admin = () => {
   const {
     products, settings, collections, genders,
@@ -403,279 +449,274 @@ const Admin = () => {
   const [search, setSearch] = useState('');
   const [genderFilter, setGenderFilter] = useState('');
   const [collectionFilter, setCollectionFilter] = useState('');
-  const [viewMode, setViewMode] = useState('cards');
+  const [sort, setSort] = useState('name');
+  const [viewMode, setViewMode] = useState('table');
   const [editProduct, setEditProduct] = useState(null);
   const [showForm, setShowForm] = useState(false);
-  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [confirm, setConfirm] = useState(null);
   const [toast, setToast] = useState(null);
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [settingsForm, setSettingsForm] = useState(settings);
+  const [showPin, setShowPin] = useState(false);
+  const toastTimer = useRef(null);
 
   useEffect(() => { setSettingsForm(settings); }, [settings]);
+  useEffect(() => () => clearTimeout(toastTimer.current), []);
 
   const showToast = (msg) => {
+    clearTimeout(toastTimer.current);
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
+    toastTimer.current = setTimeout(() => setToast(null), 3200);
   };
 
-  /* ── Auth gate ── */
   if (!isAdminAuthenticated) {
     return <LoginScreen onLogin={loginAdmin} />;
   }
 
-  /* ── Handlers ── */
+  /* ── Navigation ── */
+  const go = (tab) => {
+    setActiveTab(tab);
+    setShowForm(false);
+    setEditProduct(null);
+    setSidebarOpen(false);
+    window.scrollTo(0, 0);
+  };
+  const openEdit = (p) => { setEditProduct(p); setShowForm(true); setActiveTab('form'); window.scrollTo(0, 0); };
+  const openCreate = () => { setEditProduct(null); setShowForm(true); setActiveTab('form'); window.scrollTo(0, 0); };
+  const cancelForm = () => go('products');
+
+  /* ── Actions ── */
   const handleSaveProduct = (data) => {
     if (editProduct) {
       updateProduct(editProduct.id, data);
-      showToast(`✅ « ${data.name} » mis à jour`);
+      showToast(`« ${data.name} » est à jour sur le site.`);
     } else {
       addProduct(data);
-      showToast(`✅ « ${data.name} » ajouté au catalogue`);
+      showToast(`« ${data.name} » est ajouté au catalogue.`);
     }
-    setShowForm(false);
-    setEditProduct(null);
-    setActiveTab('products');
+    go('products');
   };
-
-  const handleDeleteConfirm = () => {
-    deleteProduct(deleteTarget.id);
-    showToast(`🗑️ « ${deleteTarget.name} » supprimé`);
-    setDeleteTarget(null);
+  const duplicate = (p) => {
+    addProduct({ ...p, name: `${p.name} (copie)` });
+    showToast(`Copie de « ${p.name} » créée. Pensez à la renommer.`);
   };
-
+  const askDelete = (p) => setConfirm({
+    title: `Supprimer « ${p.name} » ?`,
+    text: 'Le parfum disparaîtra du site immédiatement. Cette action ne peut pas être annulée.',
+    confirmLabel: 'Supprimer le parfum',
+    run: () => { deleteProduct(p.id); showToast(`« ${p.name} » est supprimé.`); },
+  });
+  const askResetProducts = () => setConfirm({
+    title: 'Revenir au catalogue d’origine ?',
+    text: 'Tous les parfums ajoutés ou modifiés depuis l’admin seront perdus.',
+    confirmLabel: 'Réinitialiser le catalogue',
+    run: () => { resetProducts(); showToast('Catalogue réinitialisé.'); },
+  });
+  const askResetSettings = () => setConfirm({
+    title: 'Réinitialiser les paramètres ?',
+    text: 'Les coordonnées et le code PIN reviendront aux valeurs par défaut.',
+    confirmLabel: 'Réinitialiser',
+    run: () => { resetSettings(); showToast('Paramètres réinitialisés.'); },
+  });
   const handleSettingsSave = () => {
     updateSettings(settingsForm);
-    showToast('✅ Paramètres sauvegardés');
+    showToast('Paramètres enregistrés.');
   };
 
-  const openEdit = (p) => {
-    setEditProduct(p);
-    setShowForm(true);
-    setActiveTab('form');
-  };
+  /* ── Données dérivées ── */
+  const q = search.trim().toLowerCase();
+  const filteredProducts = products
+    .filter((p) => (!q || [p.name, p.gender, p.collection, p.notes].join(' ').toLowerCase().includes(q))
+      && (!genderFilter || p.gender === genderFilter)
+      && (!collectionFilter || p.collection === collectionFilter))
+    .sort((a, b) => (sort === 'name' ? a.name.localeCompare(b.name, 'fr')
+      : sort === 'price-asc' ? a.price - b.price : b.price - a.price));
 
-  const openCreate = () => {
-    setEditProduct(null);
-    setShowForm(true);
-    setActiveTab('form');
-  };
+  const prices = products.map((p) => p.price);
+  const available = products.filter((p) => (p.availability || 'Disponible') !== 'Rupture de stock').length;
+  const masters = products.filter((p) => p.collection === 'Master' && p.masterDetails);
+  const masterLeft = masters.reduce((s, p) => s + Number(p.masterDetails.available || 0), 0);
+  const masterTotal = masters.reduce((s, p) => s + Number(p.masterDetails.total || 0), 0);
+  const avgPrice = prices.length ? Math.round(prices.reduce((s, v) => s + v, 0) / prices.length) : 0;
+  const toCheck = products.map((p) => ({ p, issues: auditProduct(p) })).filter((x) => x.issues.length);
 
-  const cancelForm = () => {
-    setShowForm(false);
-    setEditProduct(null);
-    setActiveTab('products');
-  };
+  const title = {
+    dashboard: 'Tableau de bord',
+    products: 'Parfums',
+    form: editProduct ? `Modifier ${editProduct.name}` : 'Nouveau parfum',
+    settings: 'Paramètres',
+  }[activeTab];
 
-  /* ── Filtered products ── */
-  const filteredProducts = products.filter(p => {
-    const matchSearch = !search ||
-      p.name.toLowerCase().includes(search.toLowerCase()) ||
-      p.gender.toLowerCase().includes(search.toLowerCase()) ||
-      p.collection.toLowerCase().includes(search.toLowerCase());
-    const matchGender = !genderFilter || p.gender === genderFilter;
-    const matchCollection = !collectionFilter || p.collection === collectionFilter;
-    return matchSearch && matchGender && matchCollection;
-  });
-
-  /* ── Stats ── */
-  const totalValue = products.reduce((sum, p) => sum + p.price, 0);
-  const formatPrice = (v) => v.toLocaleString('fr-FR') + ' FCFA';
-
-  /* ─────────────────────────────────────────
-     RENDER
-  ───────────────────────────────────────── */
   return (
     <div className="admin">
-
-      {/* ── Sidebar ── */}
-      <aside className={`admin__sidebar ${sidebarOpen ? 'admin__sidebar--open' : ''}`}>
-        <div className="admin__sidebar-header">
-          <div className="admin__sidebar-logo" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="LUX AURA" style={{ width: '38px', height: '38px', borderRadius: '6px', border: '1px solid rgba(212, 175, 55, 0.35)', objectFit: 'cover' }} />
-            <div>
-              LUX AURA
-              <span>Administration</span>
-            </div>
+      {/* ── Navigation ── */}
+      <aside className={`admin__sidebar ${sidebarOpen ? 'admin__sidebar--open' : ''}`} aria-label="Administration">
+        <div className="ad-brand">
+          <img src={`${import.meta.env.BASE_URL}logo.jpg`} alt="" />
+          <div>
+            <p className="ad-brand__name">LUX AURA</p>
+            <p className="ad-brand__sub">Administration</p>
           </div>
         </div>
-        <div className="admin__sidebar-nav">
-          <div className="admin__nav-section">
-            <p className="admin__nav-label">Principal</p>
-            <button className={`admin__nav-item ${activeTab === 'dashboard' ? 'admin__nav-item--active' : ''}`}
-              onClick={() => { setActiveTab('dashboard'); setSidebarOpen(false); }}>
-              <span className="admin__nav-icon">📊</span> Tableau de bord
-            </button>
-            <button className={`admin__nav-item ${activeTab === 'products' || activeTab === 'form' ? 'admin__nav-item--active' : ''}`}
-              onClick={() => { setActiveTab('products'); setShowForm(false); setEditProduct(null); setSidebarOpen(false); }}>
-              <span className="admin__nav-icon">🧴</span> Produits
-            </button>
-          </div>
-          <div className="admin__nav-section">
-            <p className="admin__nav-label">Configuration</p>
-            <button className={`admin__nav-item ${activeTab === 'settings' ? 'admin__nav-item--active' : ''}`}
-              onClick={() => { setActiveTab('settings'); setSidebarOpen(false); }}>
-              <span className="admin__nav-icon">⚙️</span> Paramètres
-            </button>
-          </div>
-        </div>
-        <div className="admin__sidebar-footer">
-          <Link to="/" className="admin__back-link">← Voir le site</Link>
-          <button onClick={logoutAdmin} className="admin__back-link" style={{marginTop:'0.75rem',border:'none',background:'none',cursor:'pointer',padding:0,width:'100%'}}>
-            🔒 Déconnexion
-          </button>
+        <nav className="ad-nav">
+          {NAV.map(({ id, label, icon: Icon }) => {
+            const on = activeTab === id || (id === 'products' && activeTab === 'form');
+            return (
+              <button key={id} className={`ad-nav__item ${on ? 'ad-nav__item--on' : ''}`} aria-current={on ? 'page' : undefined} onClick={() => go(id)}>
+                <Icon size={18} strokeWidth={1.75} aria-hidden="true" /> {label}
+                {id === 'dashboard' && toCheck.length > 0 && <span className="ad-nav__count" aria-label={`${toCheck.length} à vérifier`}>{toCheck.length}</span>}
+              </button>
+            );
+          })}
+        </nav>
+        <div className="ad-sidefoot">
+          <Link to="/" className="ad-sidefoot__link"><ExternalLink size={16} aria-hidden="true" /> Voir le site</Link>
+          <button className="ad-sidefoot__link" onClick={logoutAdmin}><LogOut size={16} aria-hidden="true" /> Se déconnecter</button>
         </div>
       </aside>
+      {sidebarOpen && <button className="ad-scrim" aria-label="Fermer le menu" onClick={() => setSidebarOpen(false)} />}
 
-      {/* ── Mobile Toggle ── */}
-      <button className="admin__mobile-toggle" onClick={() => setSidebarOpen(v => !v)}>
-        {sidebarOpen ? '✕' : '☰'}
-      </button>
-
-      {/* ── Main ── */}
       <main className="admin__main">
-        <div className="admin__topbar">
-          <div className="admin__topbar-left">
-            {activeTab === 'form' && (
-              <button className="admin__topbar-back" onClick={cancelForm}>← Retour</button>
-            )}
-            <h1 className="admin__topbar-title">
-              {activeTab === 'dashboard' && 'Tableau de bord'}
-              {activeTab === 'products' && 'Gestion des produits'}
-              {activeTab === 'form' && (editProduct ? `Modifier — ${editProduct.name}` : 'Nouveau parfum')}
-              {activeTab === 'settings' && 'Paramètres'}
-            </h1>
-          </div>
-          <div className="admin__topbar-actions">
-            <Link to="/" className="admin__btn admin__btn--ghost">🌍 Voir le site</Link>
-            {activeTab === 'products' && (
-              <button className="admin__btn admin__btn--primary" onClick={openCreate}>
-                ➕ Ajouter un parfum
-              </button>
+        <header className="ad-top">
+          <button className="ad-top__menu" aria-label="Ouvrir le menu" onClick={() => setSidebarOpen(true)}><Menu size={20} /></button>
+          {activeTab === 'form' && (
+            <button className="ad-top__back" onClick={cancelForm} aria-label="Retour aux parfums"><ArrowLeft size={18} /></button>
+          )}
+          <h1 className="ad-top__title">{title}</h1>
+          <div className="ad-top__actions">
+            {(activeTab === 'products' || activeTab === 'dashboard') && (
+              <button className="admin__btn admin__btn--primary" onClick={openCreate}><Plus size={17} aria-hidden="true" /> <span className="ad-hide-sm">Ajouter un parfum</span></button>
             )}
           </div>
-        </div>
+        </header>
 
         <div className="admin__content">
-
-          {/* ════════════════ DASHBOARD ════════════════ */}
+          {/* ════════ TABLEAU DE BORD ════════ */}
           {activeTab === 'dashboard' && (
-            <>
-              <div className="admin__stats">
-                <div className="admin__stat-card">
-                  <p className="admin__stat-label">Total produits</p>
-                  <p className="admin__stat-value">{products.length}</p>
-                  <p className="admin__stat-meta">dans le catalogue</p>
+            <div className="ad-dash">
+              <div className="ad-tiles">
+                <div className="ad-tile">
+                  <p className="ad-tile__label">Parfums au catalogue</p>
+                  <p className="ad-tile__value">{products.length}</p>
+                  <p className="ad-tile__meta">{genders.map((g) => `${products.filter((p) => p.gender === g).length} ${g.toLowerCase()}`).join(', ')}</p>
                 </div>
-                <div className="admin__stat-card">
-                  <p className="admin__stat-label">Valeur catalogue</p>
-                  <p className="admin__stat-value">{(totalValue / 1000).toFixed(0)}k</p>
-                  <p className="admin__stat-meta">{formatPrice(totalValue)}</p>
+                <div className="ad-tile">
+                  <p className="ad-tile__label">Disponibles à la vente</p>
+                  <p className="ad-tile__value">{available}<span> / {products.length}</span></p>
+                  <p className="ad-tile__meta">{products.length - available} en rupture</p>
                 </div>
-                {genders.map(g => (
-                  <div className="admin__stat-card" key={g}>
-                    <p className="admin__stat-label">{g}</p>
-                    <p className="admin__stat-value">{products.filter(p => p.gender === g).length}</p>
-                    <p className="admin__stat-meta">parfums</p>
-                  </div>
-                ))}
-                <div className="admin__stat-card">
-                  <p className="admin__stat-label">Collections</p>
-                  <p className="admin__stat-value">{collections.length}</p>
-                  <p className="admin__stat-meta">{collections.join(', ')}</p>
+                <div className="ad-tile">
+                  <p className="ad-tile__label">Pièces Master restantes</p>
+                  <p className="ad-tile__value">{masterLeft}<span> / {masterTotal}</span></p>
+                  <span className="ad-meter" role="img" aria-label={`${masterLeft} pièces restantes sur ${masterTotal}`}>
+                    <span style={{ width: `${masterTotal ? (masterLeft / masterTotal) * 100 : 0}%` }} />
+                  </span>
+                </div>
+                <div className="ad-tile">
+                  <p className="ad-tile__label">Prix moyen</p>
+                  <p className="ad-tile__value ad-tile__value--sm">{formatPrice(avgPrice)}</p>
+                  {prices.length > 0 && <p className="ad-tile__meta">de {formatPrice(Math.min(...prices))} à {formatPrice(Math.max(...prices))}</p>}
                 </div>
               </div>
 
-              <div className="admin__table-wrap">
-                <div className="admin__table-header">
-                  <h3 className="admin__table-title">Aperçu du catalogue</h3>
-                  <button className="admin__btn admin__btn--ghost" onClick={() => setActiveTab('products')}>Gérer →</button>
+              <section className="ad-panel">
+                <div className="ad-panel__head">
+                  <h2 className="ad-panel__title">À vérifier</h2>
+                  <p className="ad-panel__sub">{toCheck.length ? `${toCheck.length} parfum${toCheck.length > 1 ? 's' : ''} à compléter ou corriger` : 'Tout est en ordre.'}</p>
                 </div>
-                <table className="admin__table">
-                  <thead><tr><th>Image</th><th>Nom</th><th>Genre</th><th>Collection</th><th>Prix</th></tr></thead>
-                  <tbody>
-                    {products.slice(0, 6).map(p => (
-                      <tr key={p.id} style={{cursor:'pointer'}} onClick={() => openEdit(p)}>
-                        <td><img src={p.image} alt="" className="admin__table-img" onError={e => { e.target.style.background='#222'; }} /></td>
-                        <td className="admin__table-name">{p.name}</td>
-                        <td><span className={`admin__table-badge admin__table-badge--${p.gender.toLowerCase()}`}>{p.gender}</span></td>
-                        <td><span className={`admin__table-badge admin__table-badge--${p.collection.toLowerCase()}`}>{p.collection}</span></td>
-                        <td>{formatPrice(p.price)}</td>
-                      </tr>
+                {toCheck.length > 0 && (
+                  <ul className="ad-check">
+                    {toCheck.map(({ p, issues }) => (
+                      <li key={p.id} className="ad-check__row">
+                        <Thumb p={p} />
+                        <div className="ad-check__body">
+                          <p className="ad-check__name">{p.name}</p>
+                          <ul className="ad-check__issues">
+                            {issues.map((i) => <li key={i}><TriangleAlert size={14} aria-hidden="true" /> {i}</li>)}
+                          </ul>
+                        </div>
+                        <button className="admin__btn admin__btn--ghost" onClick={() => openEdit(p)}>Corriger</button>
+                      </li>
                     ))}
-                  </tbody>
-                </table>
+                  </ul>
+                )}
+              </section>
+
+              <div className="ad-split">
+                <Bars title="Parfums par genre" rows={genders.map((g) => ({ label: g, value: products.filter((p) => p.gender === g).length }))} />
+                <Bars title="Parfums par collection" rows={collections.map((c) => ({ label: c, value: products.filter((p) => p.collection === c).length }))} />
               </div>
-            </>
+            </div>
           )}
 
-          {/* ════════════════ PRODUCTS LIST ════════════════ */}
+          {/* ════════ PARFUMS ════════ */}
           {activeTab === 'products' && (
             <>
-              {/* Filters */}
-              <div className="admin__filters">
-                <input className="admin__table-search" placeholder="🔍 Rechercher..." value={search} onChange={e => setSearch(e.target.value)} style={{marginRight:'0.5rem'}} />
-                <button className={`admin__filter-chip ${!genderFilter ? 'admin__filter-chip--active' : ''}`}
-                  onClick={() => setGenderFilter('')}>Tous</button>
-                {genders.map(g => (
-                  <button key={g} className={`admin__filter-chip ${genderFilter === g ? 'admin__filter-chip--active' : ''}`}
-                    onClick={() => setGenderFilter(genderFilter === g ? '' : g)}>{g}</button>
-                ))}
-                <span style={{width:'1px',height:'20px',background:'rgba(255,255,255,0.1)',margin:'0 0.25rem'}} />
-                {collections.map(c => (
-                  <button key={c} className={`admin__filter-chip ${collectionFilter === c ? 'admin__filter-chip--active' : ''}`}
-                    onClick={() => setCollectionFilter(collectionFilter === c ? '' : c)}>{c}</button>
-                ))}
-                <div style={{marginLeft:'auto'}}>
-                  <div className="admin__view-toggle">
-                    <button className={`admin__view-btn ${viewMode === 'cards' ? 'admin__view-btn--active' : ''}`} onClick={() => setViewMode('cards')}>▦</button>
-                    <button className={`admin__view-btn ${viewMode === 'table' ? 'admin__view-btn--active' : ''}`} onClick={() => setViewMode('table')}>☰</button>
-                  </div>
+              <div className="ad-toolbar">
+                <label className="ad-search">
+                  <Search size={17} aria-hidden="true" />
+                  <input placeholder="Nom, note, collection…" value={search} onChange={(e) => setSearch(e.target.value)} aria-label="Rechercher un parfum" />
+                  {search && <button type="button" onClick={() => setSearch('')} aria-label="Effacer la recherche"><X size={15} /></button>}
+                </label>
+                <select className="ad-select" value={genderFilter} onChange={(e) => setGenderFilter(e.target.value)} aria-label="Genre">
+                  <option value="">Tous les genres</option>
+                  {genders.map((g) => <option key={g} value={g}>{g}</option>)}
+                </select>
+                <select className="ad-select" value={collectionFilter} onChange={(e) => setCollectionFilter(e.target.value)} aria-label="Collection">
+                  <option value="">Toutes les collections</option>
+                  {collections.map((c) => <option key={c} value={c}>{c}</option>)}
+                </select>
+                <select className="ad-select" value={sort} onChange={(e) => setSort(e.target.value)} aria-label="Trier">
+                  <option value="name">Nom A → Z</option>
+                  <option value="price-asc">Prix croissant</option>
+                  <option value="price-desc">Prix décroissant</option>
+                </select>
+                <div className="ad-view" role="group" aria-label="Affichage">
+                  <button aria-pressed={viewMode === 'table'} onClick={() => setViewMode('table')} aria-label="Liste"><List size={17} /></button>
+                  <button aria-pressed={viewMode === 'cards'} onClick={() => setViewMode('cards')} aria-label="Grille"><LayoutGrid size={17} /></button>
                 </div>
               </div>
+              <p className="ad-count">{filteredProducts.length} parfum{filteredProducts.length > 1 ? 's' : ''}</p>
 
               {filteredProducts.length === 0 ? (
-                <div className="admin__empty">
-                  <div className="admin__empty-icon">🧴</div>
-                  <p className="admin__empty-text">Aucun produit trouvé</p>
+                <div className="ad-empty">
+                  <p>Aucun parfum ne correspond à cette recherche.</p>
+                  <button className="admin__btn admin__btn--ghost" onClick={() => { setSearch(''); setGenderFilter(''); setCollectionFilter(''); }}>Effacer les filtres</button>
                 </div>
-              ) : viewMode === 'cards' ? (
-                /* ── Card View ── */
-                <div className="admin__product-cards">
-                  {filteredProducts.map(p => (
-                    <div key={p.id} className="admin__product-card">
-                      <img src={p.image} alt="" className="admin__product-card-img" onError={e => { e.target.style.background='#222'; }} />
-                      <div className="admin__product-card-body">
-                        <p className="admin__product-card-name">{p.name}</p>
-                        <div className="admin__product-card-meta">
-                          <span className={`admin__table-badge admin__table-badge--${p.gender.toLowerCase()}`}>{p.gender}</span>
-                          <span className={`admin__table-badge admin__table-badge--${p.collection.toLowerCase()}`}>{p.collection}</span>
-                        </div>
-                        <p className="admin__product-card-price">{formatPrice(p.price)}</p>
-                        <div className="admin__product-card-actions">
-                          <button className="admin__btn admin__btn--ghost" onClick={() => openEdit(p)}>✏️ Modifier</button>
-                          <button className="admin__btn admin__btn--danger" onClick={() => setDeleteTarget(p)}>🗑️</button>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                /* ── Table View ── */
-                <div className="admin__table-wrap">
-                  <table className="admin__table">
-                    <thead><tr><th>Image</th><th>Nom</th><th>Genre</th><th>Collection</th><th>Prix</th><th>Actions</th></tr></thead>
+              ) : viewMode === 'table' ? (
+                <div className="ad-table-wrap">
+                  <table className="ad-table">
+                    <thead>
+                      <tr><th>Parfum</th><th>Genre</th><th>Collection</th><th className="ad-num">Prix</th><th>Disponibilité</th><th><span className="sr-only">Actions</span></th></tr>
+                    </thead>
                     <tbody>
-                      {filteredProducts.map(p => (
+                      {filteredProducts.map((p) => (
                         <tr key={p.id}>
-                          <td><img src={p.image} alt="" className="admin__table-img" onError={e => { e.target.style.background='#222'; }} /></td>
-                          <td className="admin__table-name">{p.name}</td>
-                          <td><span className={`admin__table-badge admin__table-badge--${p.gender.toLowerCase()}`}>{p.gender}</span></td>
-                          <td><span className={`admin__table-badge admin__table-badge--${p.collection.toLowerCase()}`}>{p.collection}</span></td>
-                          <td>{formatPrice(p.price)}</td>
                           <td>
-                            <div className="admin__table-actions">
-                              <button className="admin__table-btn" title="Modifier" onClick={() => openEdit(p)}>✏️</button>
-                              <button className="admin__table-btn admin__table-btn--delete" title="Supprimer" onClick={() => setDeleteTarget(p)}>🗑️</button>
+                            <button className="ad-prod" onClick={() => openEdit(p)}>
+                              <Thumb p={p} />
+                              <span><strong>{p.name}</strong><small>{p.volume}{p.collection === 'Master' && p.masterDetails ? `, ${p.masterDetails.available} / ${p.masterDetails.total} pièces` : ''}</small></span>
+                            </button>
+                          </td>
+                          <td>{p.gender}</td>
+                          <td><span className={`ad-tag ${p.collection === 'Master' ? 'ad-tag--master' : ''}`}>{p.collection}</span></td>
+                          <td className="ad-num">{formatPrice(p.price)}</td>
+                          <td>
+                            <select
+                              className={`ad-avail ${(p.availability || 'Disponible') === 'Rupture de stock' ? 'ad-avail--off' : ''}`}
+                              value={p.availability || 'Disponible'}
+                              aria-label={`Disponibilité de ${p.name}`}
+                              onChange={(e) => { updateProduct(p.id, { availability: e.target.value }); showToast(`« ${p.name} » : ${e.target.value.toLowerCase()}.`); }}
+                            >
+                              {AVAILABILITY.map((a) => <option key={a}>{a}</option>)}
+                            </select>
+                          </td>
+                          <td>
+                            <div className="ad-actions">
+                              <a className="ad-icon" href={`${import.meta.env.BASE_URL}produit/${p.id}`} target="_blank" rel="noreferrer" title="Voir sur le site" aria-label={`Voir ${p.name} sur le site`}><Eye size={17} /></a>
+                              <button className="ad-icon" onClick={() => openEdit(p)} title="Modifier" aria-label={`Modifier ${p.name}`}><Pencil size={17} /></button>
+                              <button className="ad-icon" onClick={() => duplicate(p)} title="Dupliquer" aria-label={`Dupliquer ${p.name}`}><Copy size={17} /></button>
+                              <button className="ad-icon ad-icon--danger" onClick={() => askDelete(p)} title="Supprimer" aria-label={`Supprimer ${p.name}`}><Trash2 size={17} /></button>
                             </div>
                           </td>
                         </tr>
@@ -683,79 +724,92 @@ const Admin = () => {
                     </tbody>
                   </table>
                 </div>
+              ) : (
+                <ul className="ad-grid">
+                  {filteredProducts.map((p) => (
+                    <li key={p.id} className="ad-card">
+                      <button className="ad-card__media" onClick={() => openEdit(p)} aria-label={`Modifier ${p.name}`}>
+                        {p.image ? <img src={p.image} alt="" /> : <ImageOff size={22} aria-hidden="true" />}
+                      </button>
+                      <div className="ad-card__body">
+                        <p className="ad-card__name">{p.name}</p>
+                        <p className="ad-card__meta">{p.gender}, {p.collection}, {p.volume}</p>
+                        <p className="ad-card__price">{formatPrice(p.price)}</p>
+                      </div>
+                      <div className="ad-actions">
+                        <button className="ad-icon" onClick={() => openEdit(p)} aria-label={`Modifier ${p.name}`}><Pencil size={17} /></button>
+                        <button className="ad-icon" onClick={() => duplicate(p)} aria-label={`Dupliquer ${p.name}`}><Copy size={17} /></button>
+                        <button className="ad-icon ad-icon--danger" onClick={() => askDelete(p)} aria-label={`Supprimer ${p.name}`}><Trash2 size={17} /></button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
               )}
             </>
           )}
 
-          {/* ════════════════ PRODUCT FORM ════════════════ */}
+          {/* ════════ FORMULAIRE ════════ */}
           {activeTab === 'form' && showForm && (
-            <ProductForm
-              product={editProduct}
-              onSave={handleSaveProduct}
-              onCancel={cancelForm}
-              collections={collections}
-              genders={genders}
-            />
+            <ProductForm product={editProduct} onSave={handleSaveProduct} onCancel={cancelForm} collections={collections} genders={genders} />
           )}
 
-          {/* ════════════════ SETTINGS ════════════════ */}
+          {/* ════════ PARAMÈTRES ════════ */}
           {activeTab === 'settings' && (
-            <>
-              <div className="admin__settings-section">
-                <h3 className="admin__settings-title">🏪 Informations du site</h3>
+            <div className="ad-settings">
+              <section className="admin__form-section">
+                <h2 className="admin__form-section-title">Coordonnées affichées</h2>
                 <div className="admin__form-grid">
-                  <div className="admin__form-group">
-                    <label className="admin__form-label">Nom du site</label>
-                    <input className="admin__form-input" value={settingsForm.siteName}
-                      onChange={e => setSettingsForm(p => ({ ...p, siteName: e.target.value }))} />
-                  </div>
-                  <div className="admin__form-group">
-                    <label className="admin__form-label">Devise</label>
-                    <input className="admin__form-input" value={settingsForm.currency}
-                      onChange={e => setSettingsForm(p => ({ ...p, currency: e.target.value }))} />
-                  </div>
-                  <div className="admin__form-group">
-                    <label className="admin__form-label">Email de contact</label>
-                    <input className="admin__form-input" value={settingsForm.contactEmail}
-                      onChange={e => setSettingsForm(p => ({ ...p, contactEmail: e.target.value }))} />
-                  </div>
-                  <div className="admin__form-group">
-                    <label className="admin__form-label">Téléphone</label>
-                    <input className="admin__form-input" value={settingsForm.contactPhone}
-                      onChange={e => setSettingsForm(p => ({ ...p, contactPhone: e.target.value }))} />
-                  </div>
+                  {[['siteName', 'Nom du site'], ['currency', 'Devise'], ['contactEmail', 'E-mail de contact'], ['contactPhone', 'Téléphone']].map(([k, label]) => (
+                    <div className="admin__form-group" key={k}>
+                      <label className="admin__form-label" htmlFor={`set-${k}`}>{label}</label>
+                      <input id={`set-${k}`} className="admin__form-input" value={settingsForm[k] || ''}
+                        onChange={(e) => setSettingsForm((s) => ({ ...s, [k]: e.target.value }))} />
+                    </div>
+                  ))}
                 </div>
+              </section>
+
+              <section className="admin__form-section">
+                <h2 className="admin__form-section-title">Accès à l’administration</h2>
+                <div className="admin__form-group">
+                  <label className="admin__form-label" htmlFor="set-pin">Code PIN</label>
+                  <div className="ad-pin">
+                    <input id="set-pin" className="admin__form-input" type={showPin ? 'text' : 'password'} inputMode="numeric" value={settingsForm.adminPin || ''}
+                      onChange={(e) => setSettingsForm((s) => ({ ...s, adminPin: e.target.value }))} />
+                    <button type="button" className="ad-icon" onClick={() => setShowPin((v) => !v)} aria-label={showPin ? 'Masquer le code' : 'Afficher le code'}><Eye size={17} /></button>
+                  </div>
+                  <p className="ad-help">Ce code protège l’accès sur cet appareil uniquement : les données sont enregistrées dans ce navigateur.</p>
+                </div>
+              </section>
+
+              <div className="admin__form-actions">
+                <button className="admin__btn admin__btn--primary" onClick={handleSettingsSave}><Save size={17} aria-hidden="true" /> Enregistrer</button>
               </div>
 
-              <div className="admin__settings-section">
-                <h3 className="admin__settings-title">🔐 Sécurité</h3>
-                <div className="admin__form-grid">
-                  <div className="admin__form-group">
-                    <label className="admin__form-label">Code PIN admin</label>
-                    <input className="admin__form-input" value={settingsForm.adminPin}
-                      onChange={e => setSettingsForm(p => ({ ...p, adminPin: e.target.value }))} />
-                  </div>
+              <section className="admin__form-section ad-danger">
+                <h2 className="admin__form-section-title">Réinitialisation</h2>
+                <p className="ad-help">À utiliser seulement pour repartir de zéro.</p>
+                <div className="ad-danger__actions">
+                  <button className="admin__btn admin__btn--ghost" onClick={askResetSettings}><RotateCcw size={16} aria-hidden="true" /> Réinitialiser les paramètres</button>
+                  <button className="admin__btn admin__btn--danger" onClick={askResetProducts}><RotateCcw size={16} aria-hidden="true" /> Réinitialiser le catalogue</button>
                 </div>
-              </div>
-
-              <div style={{ display: 'flex', gap: '0.75rem', marginTop: '1.5rem', flexWrap: 'wrap' }}>
-                <button className="admin__btn admin__btn--primary" onClick={handleSettingsSave}>💾 Sauvegarder</button>
-                <button className="admin__btn admin__btn--ghost" onClick={() => { resetSettings(); showToast('🔄 Paramètres réinitialisés'); }}>Réinitialiser paramètres</button>
-                <button className="admin__btn admin__btn--danger" onClick={() => { resetProducts(); showToast('🔄 Catalogue réinitialisé'); }}>Réinitialiser produits</button>
-              </div>
-            </>
+              </section>
+            </div>
           )}
-
         </div>
       </main>
 
-      {/* ── Modals ── */}
-      {deleteTarget && (
-        <DeleteModal productName={deleteTarget.name} onConfirm={handleDeleteConfirm} onClose={() => setDeleteTarget(null)} />
+      {confirm && (
+        <ConfirmModal
+          title={confirm.title}
+          text={confirm.text}
+          confirmLabel={confirm.confirmLabel}
+          onClose={() => setConfirm(null)}
+          onConfirm={() => { confirm.run(); setConfirm(null); }}
+        />
       )}
 
-      {/* ── Toast ── */}
-      {toast && <div className="admin__toast">{toast}</div>}
+      {toast && <div className="admin__toast" role="status"><Check size={17} aria-hidden="true" /> {toast}</div>}
     </div>
   );
 };
