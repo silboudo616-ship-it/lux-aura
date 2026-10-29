@@ -5,12 +5,17 @@ import './Header.css';
 
 const Header = () => {
   const [scrolled, setScrolled] = useState(false);
+  const [hidden, setHidden] = useState(false);
+  const lastY = useRef(0);
   const [menuOpen, setMenuOpen] = useState(false);
   const { cartCount, setIsCartOpen } = useCart();
   const location = useLocation();
 
   const handleScroll = useCallback(() => {
-    setScrolled(window.scrollY > 60);
+    const y = window.scrollY;
+    setScrolled(y > 60);
+    setHidden(y > 400 && y > lastY.current);
+    lastY.current = y;
   }, []);
 
   useEffect(() => {
@@ -25,7 +30,7 @@ const Header = () => {
 
   return (
     <>
-      <header className={`header ${scrolled ? 'header--scrolled' : ''} ${isHome && !scrolled ? 'header--transparent' : ''}`}>
+      <header className={`header ${scrolled ? 'header--scrolled' : ''} ${hidden && !menuOpen ? 'header--hidden' : ''} ${isHome && !scrolled ? 'header--transparent' : ''}`}>
         <div className="header__inner">
 
           {/* LEFT — LOGO */}

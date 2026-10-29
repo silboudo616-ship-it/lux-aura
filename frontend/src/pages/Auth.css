@@ -18,7 +18,7 @@
 .auth-visual__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(to top, rgba(11,11,11,0.7) 0%, transparent 60%);
+  background: linear-gradient(to top, rgba(4,21,15,0.85) 0%, transparent 60%);
 }
 .auth-visual__quote {
   position: absolute;

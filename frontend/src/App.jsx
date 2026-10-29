@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { lazy, Suspense } from 'react';
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { CartProvider } from './context/CartContext';
 import { ProductProvider } from './context/ProductContext';
@@ -8,7 +8,8 @@ import Collections from './pages/Collections';
 import Product from './pages/Product';
 import Auth from './pages/Auth';
 import Account from './pages/Account';
-import Admin from './pages/Admin';
+// L'admin n'est pas utile aux visiteurs : chargé à la demande (bundle séparé).
+const Admin = lazy(() => import('./pages/Admin'));
 
 function App() {
   return (
@@ -17,7 +18,7 @@ function App() {
         <BrowserRouter basename={import.meta.env.BASE_URL}>
           <Routes>
             {/* Admin — standalone layout (no header/footer) */}
-            <Route path="/admin/*" element={<Admin />} />
+            <Route path="/admin/*" element={<Suspense fallback={null}><Admin /></Suspense>} />
 
             {/* Public site */}
             <Route path="/" element={<Layout />}>

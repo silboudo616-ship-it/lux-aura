@@ -16,6 +16,7 @@ const CartDrawer = () => {
         className={`cart-drawer ${isCartOpen ? 'cart-drawer--open' : ''}`}
         aria-label="Votre panier"
         role="dialog"
+        data-lenis-prevent
         aria-modal="true"
       >
         {/* HEADER */}

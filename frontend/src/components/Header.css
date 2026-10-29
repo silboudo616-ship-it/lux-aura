@@ -6,10 +6,12 @@
   top: 0; left: 0;
   width: 100%;
   z-index: 900;
-  transition: background var(--t-med), backdrop-filter var(--t-med), padding var(--t-med), border-color var(--t-med);
+  transition: background var(--t-med), backdrop-filter var(--t-med), padding var(--t-med), border-color var(--t-med), transform var(--t-med);
   padding: 2rem 0;
   border-bottom: 1px solid transparent;
 }
+
+.header--hidden { transform: translateY(-100%); }
 
 .header--transparent {
   background: transparent;
@@ -145,7 +147,7 @@
   justify-content: center;
   width: 16px; height: 16px;
   background: var(--gold);
-  color: var(--white);
+  color: var(--emerald-black);
   border-radius: 50%;
   font-size: 0.6rem;
   font-weight: 600;

@@ -146,7 +146,7 @@
 .account-table td {
   padding: 1.25rem 1rem;
   border-bottom: 1px solid var(--grey-lt);
-  color: var(--grey-dk);
+  color: var(--ivory-muted);
   vertical-align: middle;
 }
 .account-table tr:last-child td { border-bottom: none; }
@@ -155,7 +155,7 @@
   font-family: var(--font-sans);
   font-size: 0.8rem;
   letter-spacing: 0.05em;
-  color: var(--black);
+  color: var(--gold-light);
   background: var(--grey-lt);
   padding: 0.2rem 0.5rem;
 }
@@ -174,7 +174,7 @@
 /* RECEIPTS */
 .receipt-list { display: flex; flex-direction: column; gap: 1.5rem; }
 .receipt-item {
-  background: var(--white);
+  background: var(--emerald-dark);
   border: 1px solid var(--grey-lt);
   padding: 2rem;
   display: flex;
