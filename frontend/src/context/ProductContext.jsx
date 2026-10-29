@@ -8,6 +8,9 @@ export const useProducts = () => useContext(ProductContext);
 const STORAGE_KEY = 'luxe_aura_products';
 const SETTINGS_KEY = 'luxe_aura_settings';
 const AUTH_KEY = 'luxe_aura_admin_auth';
+// À incrémenter quand le catalogue par défaut (mockData) change.
+const DATA_VERSION_KEY = 'luxe_aura_data_version';
+const DATA_VERSION = '2026-10-29b';
 
 const defaultSettings = {
   siteName: 'LUX AURA',
@@ -26,7 +29,15 @@ export const ProductProvider = ({ children }) => {
   const [products, setProducts] = useState(() => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY);
-      return stored ? JSON.parse(stored) : defaultPerfumes;
+      if (!stored) return defaultPerfumes;
+      const list = JSON.parse(stored);
+      // Catalogue mis à jour depuis la dernière visite : on repart du catalogue officiel
+      // et on conserve seulement les parfums ajoutés depuis l'admin (ids absents du catalogue).
+      if (localStorage.getItem(DATA_VERSION_KEY) !== DATA_VERSION) {
+        const known = new Set(defaultPerfumes.map((p) => p.id));
+        return [...defaultPerfumes, ...list.filter((p) => !known.has(p.id))];
+      }
+      return list;
     } catch {
       return defaultPerfumes;
     }
@@ -54,6 +65,7 @@ export const ProductProvider = ({ children }) => {
   /* ─── persist to localStorage on change ─── */
   useEffect(() => {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(products));
+    localStorage.setItem(DATA_VERSION_KEY, DATA_VERSION);
   }, [products]);
 
   useEffect(() => {

@@ -1,101 +1,94 @@
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { gsap, SplitText, useGSAP, prefersReducedMotion } from '../motion/gsap';
+import Sillage from '../home/Sillage';
 import './Footer.css';
 
-const Footer = () => {
-  const [email, setEmail] = useState('');
-  const [sub, setSub] = useState(false);
+const LINKS = [
+  { title: 'Parfums', items: [
+    ['Homme', '/collections?gender=Hommes'], ['Femme', '/collections?gender=Femmes'],
+    ['Mixte', '/collections?gender=Mixte'], ['Tous les parfums', '/collections'],
+  ] },
+  { title: 'Collections', items: [
+    ['Standard', '/collections?level=Standard'], ['Premium', '/collections?level=Premium'],
+    ['Légende', '/collections?level=L%C3%A9gende'], ['Master', '/collections?level=Master'],
+  ] },
+  { title: 'Votre compte', items: [['Se connecter', '/connexion'], ['Mes commandes', '/compte']] },
+];
 
-  const handleSubmit = (e) => {
+const Footer = () => {
+  const root = useRef(null);
+  const [email, setEmail] = useState('');
+  const [sent, setSent] = useState(false);
+
+  /* Le nom de la maison monte lettre par lettre à mesure que l'on arrive en bas de page. */
+  useGSAP(() => {
+    if (prefersReducedMotion()) return;
+    const q = gsap.utils.selector(root);
+    const mark = q('.ft-mark')[0];
+    const split = SplitText.create(mark.querySelector('.sillage__text'), { type: 'chars', mask: 'chars', charsClass: 'sl-char' });
+    mark.querySelectorAll('.sillage__echo').forEach((e) => SplitText.create(e, { type: 'chars', charsClass: 'sl-char' }));
+    gsap.timeline({
+      scrollTrigger: { trigger: mark, start: 'top bottom', end: 'bottom bottom', scrub: 0.6 },
+    })
+      .from(split.chars, { yPercent: 105, stagger: 0.06, ease: 'power3.out' })
+      .from(mark.querySelectorAll('.sillage__echo'), { yPercent: -40, autoAlpha: 0, ease: 'none' }, 0.2);
+    gsap.from(q('.ft-news > *, .ft-col'), {
+      autoAlpha: 0, y: 30, stagger: 0.08, duration: 0.9, ease: 'expo.out',
+      scrollTrigger: { trigger: root.current, start: 'top 85%' },
+    });
+  }, { scope: root });
+
+  const submit = (e) => {
     e.preventDefault();
-    setSub(true);
+    setSent(true);
     setEmail('');
   };
 
   return (
-    <footer className="footer">
-      <div className="footer__top container">
-
-        {/* BRAND */}
-        <div className="footer__brand">
-          <Link to="/" className="footer__logo-wrap" aria-label="LUX AURA Accueil">
-            <img 
-              src={`${import.meta.env.BASE_URL}logo.jpg`} 
-              alt="LUX AURA" 
-              className="footer__logo-img" 
-            />
-            <span className="footer__logo">LUX AURA</span>
-          </Link>
-          <p className="footer__tagline t-body">
-            La haute parfumerie,<br />portée à son apogée.
-          </p>
-          <div className="footer__socials">
-            {['Instagram', 'Facebook', 'WhatsApp'].map(s => (
-              <a key={s} href="#" className="footer__social-link" aria-label={s}>{s}</a>
-            ))}
-          </div>
-        </div>
-
-        {/* COLLECTIONS */}
-        <div className="footer__col">
-          <h3 className="footer__col-title t-label">Collections</h3>
-          <ul className="footer__links">
-            <li><Link to="/collections?level=Standard"  className="footer__link">Standard</Link></li>
-            <li><Link to="/collections?level=Premium"   className="footer__link">Premium</Link></li>
-            <li><Link to="/collections?level=L%C3%A9gende" className="footer__link">Légende</Link></li>
-            <li><Link to="/collections?level=Master"   className="footer__link footer__link--gold">Master Collection</Link></li>
-          </ul>
-        </div>
-
-        {/* MAISON */}
-        <div className="footer__col">
-          <h3 className="footer__col-title t-label">La Maison</h3>
-          <ul className="footer__links">
-            <li><Link to="/"           className="footer__link">Notre Histoire</Link></li>
-            <li><Link to="/"           className="footer__link">Savoir-Faire</Link></li>
-            <li><Link to="/connexion"  className="footer__link">Mon Compte</Link></li>
-            <li><Link to="/connexion"  className="footer__link">Rejoindre la Maison</Link></li>
-          </ul>
-        </div>
-
-        {/* NEWSLETTER */}
-        <div className="footer__newsletter">
-          <h3 className="footer__col-title t-label">Lettre de la Maison</h3>
-          <p className="footer__newsletter-desc t-body">
-            Nouvelles créations, éditions rares et événements exclusifs.
-          </p>
-          {sub ? (
-            <p className="footer__newsletter-thanks">Merci pour votre inscription.</p>
+    <footer className="ft" ref={root}>
+      <div className="ft-top">
+        <div className="ft-news">
+          <h2 className="ft-news__title">Les nouveaux parfums, avant tout le monde.</h2>
+          {sent ? (
+            <p className="ft-news__done" role="status">Inscription enregistrée. La prochaine lettre arrivera dans votre boîte.</p>
           ) : (
-            <form className="footer__newsletter-form" onSubmit={handleSubmit}>
+            <form className="ft-news__form" onSubmit={submit}>
+              <label className="ft-news__label" htmlFor="ft-email">Votre adresse e-mail</label>
               <input
+                id="ft-email"
                 type="email"
                 required
                 value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Votre adresse e-mail"
-                className="footer__newsletter-input"
-                aria-label="E-mail newsletter"
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="nom@exemple.com"
+                className="ft-news__input"
+                autoComplete="email"
               />
-              <button type="submit" className="btn btn--light footer__newsletter-btn">
-                S'abonner
-              </button>
+              <button type="submit" className="ft-news__btn">S’inscrire</button>
             </form>
           )}
         </div>
 
+        <nav className="ft-cols" aria-label="Pied de page">
+          {LINKS.map((col) => (
+            <div className="ft-col" key={col.title}>
+              <h3 className="ft-col__title">{col.title}</h3>
+              <ul>
+                {col.items.map(([label, to]) => (
+                  <li key={label}><Link to={to} className="ft-link">{label}</Link></li>
+                ))}
+              </ul>
+            </div>
+          ))}
+        </nav>
       </div>
 
-      {/* BOTTOM BAR */}
-      <div className="footer__bottom container">
-        <p className="t-label" style={{ color: 'rgba(255,255,255,0.4)' }}>
-          © {new Date().getFullYear()} LUX AURA. Tous droits réservés.
-        </p>
-        <div className="footer__legal">
-          <a href="#" className="footer__legal-link">Mentions Légales</a>
-          <a href="#" className="footer__legal-link">Politique de Confidentialité</a>
-          <a href="#" className="footer__legal-link">CGV</a>
-        </div>
+      <Sillage as="p" className="ft-mark" aria-hidden="true">LUX AURA</Sillage>
+
+      <div className="ft-bottom">
+        <span>© {new Date().getFullYear()} LUX AURA</span>
+        <span>Maison de parfums</span>
       </div>
     </footer>
   );

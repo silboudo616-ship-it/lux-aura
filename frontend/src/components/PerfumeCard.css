@@ -1,0 +1,55 @@
+/* Carte parfum partagée (accueil + collections) : fond blanc, packshot sur vert pâle. */
+.lx-grid {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: clamp(1.25rem, 2.5vw, 2.5rem) clamp(1rem, 2vw, 2rem);
+  padding: 0 var(--gutter);
+  position: relative;
+}
+.lx-card__link { display: grid; gap: 0.35rem; }
+.lx-card__media {
+  display: block;
+  aspect-ratio: 4 / 5;
+  background: var(--brume);
+  overflow: hidden;
+  margin-bottom: 0.9rem;
+}
+.lx-card__media img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  padding: 10%;
+  mix-blend-mode: multiply; /* les packshots sur fond blanc se fondent dans le vert pâle */
+  transition: scale 0.9s var(--ease-luxury);
+}
+.lx-card__link:hover .lx-card__media img { scale: 1.06; }
+.lx-card__name {
+  font-family: var(--font-serif);
+  font-weight: 600;
+  font-size: 1.3rem;
+  line-height: 1.15;
+}
+.lx-card__link:hover .lx-card__name { text-decoration: underline; text-underline-offset: 0.2em; }
+.lx-card__meta { color: var(--pierre); font-size: 0.9rem; }
+.lx-card__price { font-weight: 500; }
+
+.lx-card__tag {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  padding: 0.3rem 0.7rem;
+  border-radius: 999px;
+  background: var(--noir);
+  color: var(--blanc);
+  font-size: 0.8rem;
+}
+.lx-card__media { position: relative; }
+
+@media (max-width: 899px) {
+  .lx-grid { grid-template-columns: repeat(2, 1fr); }
+  .lx-card__name { font-size: 1.05rem; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .lx-card__media img { transition: none; }
+}

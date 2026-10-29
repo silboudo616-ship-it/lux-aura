@@ -1,6 +1,8 @@
-/* Titre "sillage" : le texte laisse derrière lui des copies en contour qui s'effacent,
+import './ui.css';
+
+/* Titre "sillage" : le texte laisse derrière lui des copies pleines qui s'effacent,
    comme la trace d'un parfum. Les copies sont décoratives (aria-hidden). */
-export default function Sillage({ as: Tag = 'h2', children, className = '', echoes = 3, ...rest }) {
+export default function Sillage({ as: Tag = 'h2', children, className = '', echoes = 2, ...rest }) {
   return (
     <Tag className={`sillage ${className}`} {...rest}>
       <span className="sillage__text">{children}</span>

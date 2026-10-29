@@ -5,6 +5,8 @@ import { useProducts } from '../context/ProductContext';
 import { gsap, ScrollTrigger, SplitText, useGSAP, prefersReducedMotion } from '../motion/gsap';
 import { bottle, POSES, POSES_MOBILE } from '../home/bottleState';
 import Sillage from '../home/Sillage';
+import PerfumeCard from '../components/PerfumeCard';
+import { img, GENRES } from '../home/media';
 import './Home.css';
 
 gsap.registerPlugin(Flip);
@@ -12,13 +14,7 @@ gsap.registerPlugin(Flip);
 // Le moteur 3D (~150 kB) n'est téléchargé qu'une fois la page affichée.
 const Bottle3D = lazy(() => import('../home/Bottle3D'));
 
-const img = (id, w = 1200) => `https://images.unsplash.com/${id}?auto=format&fit=crop&q=75&w=${w}`;
-const GENRES = [
-  { key: 'Hommes', label: 'Homme', line: 'Boisés, épicés, ambrés.', photo: 'photo-1702065613116-620168beb732', focus: '22% 40%' },
-  { key: 'Femmes', label: 'Femme', line: 'Floraux, vanillés, lumineux.', photo: 'photo-1623538244675-b97056120ab1' },
-  { key: 'Mixte',  label: 'Mixte', line: 'Oud, musc, cuir : à partager.', photo: 'photo-1609255836143-3480a093a35b' },
-];
-const BAND = ['photo-1720366788970-1f42a5e958dd', 'photo-1728140639942-6a8ed398d2d7', 'photo-1623538244675-b97056120ab1', 'photo-1609255836143-3480a093a35b'];
+const BAND = ['photo-1682251008222-412b140cbf4f', 'photo-1728140639942-6a8ed398d2d7', 'photo-1623538244675-b97056120ab1', 'photo-1609255836143-3480a093a35b'];
 const NOTES = [
   { name: 'Tête', when: 'Les premières minutes', what: 'Bergamote, poivre rose, agrumes.' },
   { name: 'Cœur', when: 'Les heures qui suivent', what: 'Jasmin, rose, fleur d’oranger.' },
@@ -101,9 +97,9 @@ const Home = () => {
       Object.assign(bottle, P.hero, { y: P.hero.y - 0.9, scale: 0.6 });
 
       /* S1 · Ouverture : le titre monte lettre par lettre, le flacon descend se poser. */
-      const title = SplitText.create(q('.lx-hero__title .sillage__text')[0], { type: 'chars', mask: 'chars', charsClass: 'sl-char' });
+      const title = SplitText.create(q('.lx-hero__title .sillage__text')[0], { type: 'words,chars', mask: 'chars', charsClass: 'sl-char', wordsClass: 'sl-word' });
       // Les copies sont découpées de la même façon : sinon leur mise en page diffère du texte découpé.
-      q('.lx-hero__title .sillage__echo').forEach((e) => SplitText.create(e, { type: 'chars', charsClass: 'sl-char' }));
+      q('.lx-hero__title .sillage__echo').forEach((e) => SplitText.create(e, { type: 'words,chars', charsClass: 'sl-char', wordsClass: 'sl-word' }));
       gsap.timeline({ delay: 0.15 })
         .from(title.chars, { yPercent: 110, stagger: 0.06, duration: 1.4, ease: 'expo.out' })
         .from(q('.lx-hero__title .sillage__echo'), { yPercent: -40, autoAlpha: 0, stagger: 0.08, duration: 1.4 }, 0.5)
@@ -296,18 +292,7 @@ const Home = () => {
         </div>
 
         <ul className="lx-grid">
-          {shown.map((p) => (
-            <li key={p.id} className="lx-card" data-flip-id={p.id}>
-              <Link to={`/produit/${p.id}`} className="lx-card__link">
-                <span className="lx-card__media">
-                  <img src={p.image} alt={p.imageAlt || p.name} loading="lazy" />
-                </span>
-                <span className="lx-card__name">{p.name}</span>
-                <span className="lx-card__meta">{p.gender}, {p.volume}</span>
-                <span className="lx-card__price">{p.price.toLocaleString('fr-FR')} FCFA</span>
-              </Link>
-            </li>
-          ))}
+          {shown.map((p) => <PerfumeCard key={p.id} perfume={p} />)}
         </ul>
         <Link to="/collections" className="lx-btn lx-btn--dark lx-collection__all">Toute la collection</Link>
       </section>

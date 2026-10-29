@@ -1,0 +1,67 @@
+/* Éléments partagés : titres sillage, boutons, pastilles de filtre. */
+/* ---------- Titre "sillage" ---------- */
+.sillage {
+  --echo: rgba(255, 255, 255, 0.13);
+  position: relative;
+  isolation: isolate;
+  margin: 0;
+  font-family: var(--font-serif);
+  font-weight: 800;
+  font-size: clamp(2.8rem, 8.2vw, 8.75rem);
+  line-height: 0.9;
+  letter-spacing: -0.025em;
+  text-transform: uppercase;
+  font-optical-sizing: auto;
+}
+.sillage__text { position: relative; display: block; }
+/* Les masques SplitText (overflow: clip) gagnent de la hauteur pour ne pas couper les accents. */
+.sl-line-mask, .sl-char-mask { padding-top: 0.16em; margin-top: -0.16em; padding-bottom: 0.04em; margin-bottom: -0.04em; }
+.sillage__echo {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  color: var(--echo);   /* copies pleines et atténuées : la trace du parfum */
+  transform: translateY(calc(var(--i) * 0.12em));
+  opacity: calc(1.15 - var(--i) * 0.4);
+  pointer-events: none;
+  user-select: none;
+}
+
+/* ---------- Boutons ---------- */
+.lx-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem 1.9rem;
+  border: 1px solid currentColor;
+  border-radius: 999px;
+  font-family: var(--font-sans);
+  font-size: 0.95rem;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  transition: background-color var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+.lx-btn--light { color: var(--blanc); }
+.lx-btn--light:hover { background: var(--blanc); color: var(--noir); border-color: var(--blanc); }
+.lx-btn--dark { color: var(--noir); }
+.lx-btn--dark:hover { background: var(--noir); color: var(--blanc); }
+
+.lx-filters { display: flex; flex-wrap: wrap; gap: 0.5rem; }
+.lx-chip {
+  padding: 0.6rem 1.15rem;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+  border-radius: 999px;
+  background: transparent;
+  color: var(--noir);
+  font-size: 0.95rem;
+  transition: background-color var(--t-fast), color var(--t-fast), border-color var(--t-fast);
+}
+.lx-chip:hover { border-color: var(--noir); }
+.lx-chip[aria-pressed='true'] { background: var(--emeraude); border-color: var(--emeraude); color: var(--blanc); }
+
+@media (max-width: 899px) {
+  .sillage { font-size: clamp(2.6rem, 12vw, 4.5rem); }
+}
+
+/* Un mot découpé en lettres ne doit jamais se couper en fin de ligne. */
+.sl-word { white-space: nowrap; }

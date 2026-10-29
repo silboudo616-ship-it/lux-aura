@@ -1,126 +1,118 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { useSearchParams, Link } from 'react-router-dom';
-import ProductCard from '../components/ProductCard';
+import React, { useLayoutEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { Flip } from 'gsap/Flip';
 import { useProducts } from '../context/ProductContext';
+import { gsap, SplitText, useGSAP, prefersReducedMotion } from '../motion/gsap';
+import Sillage from '../home/Sillage';
+import PerfumeCard from '../components/PerfumeCard';
+import { img, GENRES, LEVELS, DEFAULT_PHOTO } from '../home/media';
 import './Collections.css';
+
+gsap.registerPlugin(Flip);
 
 const Collections = () => {
   const { products, collections, genders } = useProducts();
   const [searchParams, setSearchParams] = useSearchParams();
-  const genderFilter = searchParams.get('gender') || '';
-  const levelFilter  = searchParams.get('level')  || '';
-  const pageRef = useRef(null);
+  const gender = searchParams.get('gender') || '';
+  const level = searchParams.get('level') || '';
+  const root = useRef(null);
+  const flipState = useRef(null);
 
-  useEffect(() => {
-    const els = pageRef.current?.querySelectorAll('.reveal') || [];
-    const obs = new IntersectionObserver(
-      (entries) => entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('is-visible'); obs.unobserve(e.target); } }),
-      { threshold: 0.1 }
-    );
-    els.forEach(el => obs.observe(el));
-    return () => obs.disconnect();
-  });
+  const filtered = products.filter((p) => (!gender || p.gender === gender) && (!level || p.collection === level));
+  const genre = GENRES.find((g) => g.key === gender);
+  const title = [genre?.label, level].filter(Boolean).join(' ') || 'Nos créations';
+  const lead = (level && LEVELS[level]) || genre?.line || 'Toutes nos créations, d’Orient et d’Occident.';
+  const photo = genre ?? { photo: DEFAULT_PHOTO };
 
-  const toggle = (type, value) => {
+  /* Changement de filtre : Flip mémorise la grille avant, puis anime vers la nouvelle. */
+  const setFilter = (type, value) => {
+    if (!prefersReducedMotion()) flipState.current = Flip.getState(root.current.querySelectorAll('.lx-card'));
     const p = new URLSearchParams(searchParams);
-    if (type === 'gender') {
-      genderFilter === value ? p.delete('gender') : p.set('gender', value);
-    } else {
-      levelFilter === value ? p.delete('level') : p.set('level', value);
-    }
-    setSearchParams(p);
+    if (value) p.set(type, value); else p.delete(type);
+    setSearchParams(p, { replace: true });
   };
 
-  const filtered = products.filter(p => {
-    const g = !genderFilter || p.gender    === genderFilter;
-    const l = !levelFilter  || p.collection === levelFilter;
-    return g && l;
-  });
+  useLayoutEffect(() => {
+    if (!flipState.current) return;
+    Flip.from(flipState.current, {
+      duration: 0.75, ease: 'expo.out', absolute: true, scale: true, nested: true,
+      onEnter: (els) => gsap.fromTo(els, { autoAlpha: 0, y: 50 }, { autoAlpha: 1, y: 0, duration: 0.7, stagger: 0.04 }),
+      onLeave: (els) => gsap.to(els, { autoAlpha: 0, scale: 0.92, duration: 0.3 }),
+    });
+    flipState.current = null;
+  }, [gender, level]);
 
-  const pageTitle = genderFilter || levelFilter
-    ? [genderFilter, levelFilter].filter(Boolean).join(' · ')
-    : 'Toutes les Collections';
+  /* Titre : rejoué à chaque changement d'univers (lettres qui montent, sillage qui suit). */
+  useGSAP(() => {
+    if (prefersReducedMotion()) return;
+    const q = gsap.utils.selector(root);
+    const split = SplitText.create(q('.cl-hero__title .sillage__text')[0], { type: 'words,chars', mask: 'chars', charsClass: 'sl-char', wordsClass: 'sl-word' });
+    q('.cl-hero__title .sillage__echo').forEach((e) => SplitText.create(e, { type: 'words,chars', charsClass: 'sl-char', wordsClass: 'sl-word' }));
+    gsap.timeline()
+      .from(split.chars, { yPercent: 115, stagger: 0.035, duration: 1.1, ease: 'expo.out' })
+      .from(q('.cl-hero__title .sillage__echo'), { yPercent: -50, autoAlpha: 0, stagger: 0.08, duration: 1.1 }, 0.25)
+      .from(q('.cl-hero__lead, .cl-hero__count'), { autoAlpha: 0, y: 20, stagger: 0.08, duration: 0.8 }, 0.35)
+      .fromTo(q('.cl-hero__photo'), { clipPath: 'inset(0 0 100% 0)' }, { clipPath: 'inset(0 0 0% 0)', duration: 1.3, ease: 'expo.inOut' }, 0);
+  }, { scope: root, dependencies: [title], revertOnUpdate: true });
+
+  /* Arrivée de la grille et parallax de la photo (une seule fois). */
+  useGSAP(() => {
+    if (prefersReducedMotion()) return;
+    const q = gsap.utils.selector(root);
+    gsap.from(q('.lx-card'), { y: 60, autoAlpha: 0, stagger: 0.06, duration: 1, delay: 0.3 });
+    gsap.to(q('.cl-hero__photo img'), {
+      yPercent: 12, ease: 'none',
+      scrollTrigger: { trigger: q('.cl-hero')[0], start: 'top top', end: 'bottom top', scrub: true },
+    });
+  }, { scope: root });
+
+  const chip = (type, value, current, label = value) => (
+    <button key={label} type="button" className="lx-chip cl-chip" aria-pressed={current === value} onClick={() => setFilter(type, value)}>
+      {label}
+    </button>
+  );
 
   return (
-    <div ref={pageRef} className="collections-page">
-
-      {/* HERO BANNER */}
-      <div className="coll-banner">
-        <div className="coll-banner__inner container">
-          <p className="t-label reveal" style={{ color: 'var(--gold)', marginBottom: '1rem' }}>LUX AURA</p>
-          <h1 className="coll-banner__title reveal reveal-delay-1">{pageTitle}</h1>
-          <p className="coll-banner__count reveal reveal-delay-2 t-label">
-            {filtered.length} fragrance{filtered.length !== 1 ? 's' : ''}
-          </p>
+    <div className="cl" ref={root}>
+      <header className="cl-hero">
+        <div className="cl-hero__text">
+          <Sillage as="h1" className="cl-hero__title" key={title}>{title}</Sillage>
+          <p className="cl-hero__lead">{lead}</p>
+          <p className="cl-hero__count">{filtered.length} parfum{filtered.length > 1 ? 's' : ''}</p>
         </div>
-      </div>
+        <figure className="cl-hero__photo" key={photo.photo} aria-hidden="true">
+          <img src={img(photo.photo, 1100)} alt="" style={photo.focus ? { objectPosition: photo.focus } : undefined} />
+        </figure>
+      </header>
 
-      <div className="coll-body container">
+      <nav className="cl-bar" aria-label="Filtrer les parfums">
+        <div className="cl-bar__group" role="group" aria-label="Genre">
+          <span className="cl-bar__label">Pour</span>
+          {chip('gender', '', gender, 'Tous')}
+          {genders.map((g) => chip('gender', g, gender))}
+        </div>
+        <div className="cl-bar__group" role="group" aria-label="Collection">
+          <span className="cl-bar__label">Collection</span>
+          {chip('level', '', level, 'Toutes')}
+          {collections.map((c) => chip('level', c, level))}
+        </div>
+      </nav>
 
-        {/* SIDEBAR */}
-        <aside className="coll-sidebar">
-          <div className="coll-filter-group">
-            <h3 className="coll-filter-title t-label">Genre</h3>
-            <ul className="coll-filter-list">
-              {genders.map(g => (
-                <li key={g}>
-                  <button
-                    className={`coll-filter-btn ${genderFilter === g ? 'coll-filter-btn--active' : ''}`}
-                    onClick={() => toggle('gender', g)}
-                  >
-                    {g}
-                    {genderFilter === g && <span aria-hidden className="coll-filter-check">✓</span>}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div className="coll-filter-group">
-            <h3 className="coll-filter-title t-label">Collection</h3>
-            <ul className="coll-filter-list">
-              {collections.map(c => (
-                <li key={c}>
-                  <button
-                    className={`coll-filter-btn ${levelFilter === c ? 'coll-filter-btn--active' : ''} ${c === 'Master' ? 'coll-filter-btn--gold' : ''}`}
-                    onClick={() => toggle('level', c)}
-                  >
-                    {c}
-                    {levelFilter === c && <span aria-hidden className="coll-filter-check">✓</span>}
-                  </button>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {(genderFilter || levelFilter) && (
-            <button className="coll-clear-btn" onClick={() => setSearchParams({})}>
-              Effacer les filtres
+      <section className="cl-body" aria-label="Parfums">
+        {filtered.length === 0 ? (
+          <div className="cl-empty">
+            <p className="cl-empty__title">Aucun parfum pour cette combinaison.</p>
+            <p>Choisissez une autre collection, ou retirez un filtre.</p>
+            <button type="button" className="lx-btn lx-btn--dark" onClick={() => setSearchParams({}, { replace: true })}>
+              Voir tous les parfums
             </button>
-          )}
-        </aside>
-
-        {/* PRODUCT GRID */}
-        <section className="coll-grid-section" aria-label="Parfums">
-          {filtered.length === 0 ? (
-            <div className="coll-empty">
-              <p className="coll-empty__title">Aucune fragrance ne correspond.</p>
-              <p className="coll-empty__sub t-body">Essayez d'autres filtres ou explorez toutes nos créations.</p>
-              <button className="btn" style={{ marginTop: '2rem' }} onClick={() => setSearchParams({})}>
-                Voir toute la collection
-              </button>
-            </div>
-          ) : (
-            <ul className="coll-grid">
-              {filtered.map(p => (
-                <li key={p.id} className="coll-grid__item">
-                  <ProductCard perfume={p} />
-                </li>
-              ))}
-            </ul>
-          )}
-        </section>
-      </div>
+          </div>
+        ) : (
+          <ul className="lx-grid">
+            {filtered.map((p) => <PerfumeCard key={p.id} perfume={p} />)}
+          </ul>
+        )}
+      </section>
     </div>
   );
 };

@@ -78,7 +78,7 @@ export const perfumes = [
     olfactoryFamily: 'Floral Boisé',
     notes: 'Jasmin, Santal, Muscs blancs',
     availability: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1720366788970-1f42a5e958dd?auto=format&fit=crop&q=80&w=1200',
+    image: 'https://images.unsplash.com/photo-1682251008222-412b140cbf4f?auto=format&fit=crop&q=80&w=1200',
     imageAlt: 'Flacon Lumière d\'Orient',
     description: 'Un hommage à l\'Orient lumineux. Le jasmin s\'épanouit sur un fond de santal chaud et de muscs soyeux.'
   },
