@@ -1,37 +1,46 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Inter:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bodoni+Moda:ital,opsz,wght@0,6..96,400..900;1,6..96,400..900&family=Jost:wght@300;400;500;600&display=swap');
 
 /* ========================
    DESIGN TOKENS
 ======================== */
 :root {
-  /* Emerald & Gold Luxury Palette matching LUX AURA logo */
-  --emerald-deep:    #07221A; /* Primary background */
-  --emerald-dark:    #0B2D22; /* Card & section surface */
-  --emerald-surface: #10382B; /* Hover / elevated */
-  --emerald-black:   #04150F; /* Deepest tone */
+  /* Système LUX AURA — noir, blanc, vert.
+     Les anciens noms (--gold, --emerald-*) sont conservés pour que toutes les pages suivent. */
+  --noir:      #000000;
+  --blanc:     #FFFFFF;
+  --emeraude:  #0B3D2C;  /* vert du logo : couleur de marque */
+  --foret:     #062319;  /* vert le plus sombre, surfaces */
+  --sauge:     #A9C8B6;  /* vert clair, accents sur fond sombre */
+  --brume:     #E7EFEA;  /* vert très pâle, aplats doux */
+  --pierre:    #6F7A74;  /* texte secondaire */
 
-  --black:           #07221A;
-  --ivory:           #F7F5EF;
-  --ivory-muted:     #D8D2C2;
-  --white:           #FFFFFF;
-  --gold:            #D4AF37;
-  --gold-light:      #F3DF99;
-  --gold-dark:       #A8862A;
-  --grey:            #8EA69B;
-  --grey-lt:         rgba(212, 175, 55, 0.16);
-  --grey-dk:         #133A2E;
+  --emerald-deep:    var(--emeraude);
+  --emerald-dark:    var(--foret);
+  --emerald-surface: #11513B;
+  --emerald-black:   var(--noir);
 
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans:  'Inter', system-ui, sans-serif;
+  --black:           var(--noir);
+  --ivory:           var(--blanc);
+  --ivory-muted:     #C9D3CD;
+  --white:           var(--blanc);
+  --gold:            var(--sauge);
+  --gold-light:      var(--blanc);
+  --gold-dark:       var(--emeraude);
+  --grey:            #93A39A;
+  --grey-lt:         rgba(169, 200, 182, 0.18);
+  --grey-dk:         #11513B;
 
-  --ease-luxury: cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --font-serif: 'Bodoni Moda', 'Didot', Georgia, serif;
+  --font-sans:  'Jost', system-ui, sans-serif;
+
+  --ease-luxury: cubic-bezier(0.22, 1, 0.36, 1);
   --ease-in-expo: cubic-bezier(0.7, 0, 0.84, 0);
-  --t-fast:   0.2s var(--ease-luxury);
-  --t-med:    0.5s var(--ease-luxury);
-  --t-slow:   0.9s var(--ease-luxury);
+  --t-fast:   0.25s var(--ease-luxury);
+  --t-med:    0.6s var(--ease-luxury);
+  --t-slow:   1s var(--ease-luxury);
 
   --container: 1440px;
-  --gutter:    clamp(1.5rem, 5vw, 6rem);
+  --gutter:    clamp(1.25rem, 4.5vw, 5rem);
 }
 
 /* ========================
@@ -44,8 +53,8 @@ html { scroll-behavior: auto; }
 body {
   font-family: var(--font-sans);
   font-weight: 300;
-  background: var(--emerald-deep);
-  color: var(--ivory);
+  background: var(--noir);
+  color: var(--blanc);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
@@ -219,3 +228,9 @@ button { font-family: inherit; cursor: pointer; }
 ::-webkit-scrollbar { width: 6px; }
 ::-webkit-scrollbar-track { background: var(--emerald-black); }
 ::-webkit-scrollbar-thumb { background: var(--emerald-surface); border: 1px solid var(--grey-lt); border-radius: 3px; }
+
+/* ========================
+   FOCUS / SÉLECTION
+======================== */
+:focus-visible { outline: 2px solid var(--sauge); outline-offset: 3px; }
+::selection { background: var(--emeraude); color: var(--blanc); }

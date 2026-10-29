@@ -18,11 +18,11 @@
 }
 
 .header--scrolled {
-  background: rgba(7, 34, 26, 0.95);
+  background: rgba(0, 0, 0, 0.88);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   padding: 1.1rem 0;
-  border-bottom-color: rgba(212, 175, 55, 0.22);
+  border-bottom-color: rgba(255, 255, 255, 0.08);
 }
 
 .header__inner {

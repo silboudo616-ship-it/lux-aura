@@ -63,7 +63,7 @@ export const perfumes = [
       available: 87,
       total: 300
     },
-    image: 'https://images.unsplash.com/photo-1541643600914-78b084683702?auto=format&fit=crop&q=80&w=1200',
+    image: 'https://images.unsplash.com/photo-1588405748880-12d1d2a59f75?auto=format&fit=crop&q=80&w=1200',
     imageAlt: 'Flacon Nuit Éternelle — Édition Master',
     description: 'Un chef-d\'œuvre absolu. L\'édition Master représente le pinacle de notre savoir-faire, une création numérotée pour les collectionneurs les plus exigeants.'
   },
@@ -78,7 +78,7 @@ export const perfumes = [
     olfactoryFamily: 'Floral Boisé',
     notes: 'Jasmin, Santal, Muscs blancs',
     availability: 'Disponible',
-    image: 'https://images.unsplash.com/photo-1560963689-b5682b6440f8?auto=format&fit=crop&q=80&w=1200',
+    image: 'https://images.unsplash.com/photo-1720366788970-1f42a5e958dd?auto=format&fit=crop&q=80&w=1200',
     imageAlt: 'Flacon Lumière d\'Orient',
     description: 'Un hommage à l\'Orient lumineux. Le jasmin s\'épanouit sur un fond de santal chaud et de muscs soyeux.'
   },
@@ -93,7 +93,7 @@ export const perfumes = [
     olfactoryFamily: 'Boisé Aromatique',
     notes: 'Cèdre du Liban, Vétiver de Haïti, Poivre noir',
     availability: 'Sur réservation',
-    image: 'https://images.unsplash.com/photo-1594223274512-ad4803739b7c?auto=format&fit=crop&q=80&w=1200',
+    image: 'https://images.unsplash.com/photo-1608528577891-eb055944f2e7?auto=format&fit=crop&q=80&w=1200',
     imageAlt: 'Flacon Bois de Cèdre',
   },
   {

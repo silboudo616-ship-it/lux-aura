@@ -23,10 +23,11 @@
   display: flex;
   flex-direction: column;
   transform: translateX(100%);
-  transition: transform var(--t-med);
+  visibility: hidden;
+  transition: transform var(--t-med), visibility var(--t-med);
   box-shadow: -20px 0 60px rgba(0, 0, 0, 0.4);
 }
-.cart-drawer--open { transform: translateX(0); }
+.cart-drawer--open { transform: translateX(0); visibility: visible; }
 
 /* HEADER */
 .cart-drawer__header {
